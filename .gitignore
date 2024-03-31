@@ -1,0 +1,12 @@
+.DS_store
+
+# python stuff
+*.pyc
+*.pyo
+
+# cache
+__pycache__/
+
+# env
+.env
+
