@@ -1,0 +1,28 @@
+{% extends 'thoughts/base.html' %}
+
+{% block content %}
+<div class="container mt-3">
+  <h2>All Seeds</h2>
+  <div>
+    {% for seed in seeds %}
+      <!-- Use row and col classes to align items in the same row -->
+      <div class="row mb-2">
+        <div class="col-md-9">
+          <h3>{{ seed.title }}</h3>
+          <p>{{ seed.description|truncatewords:30 }}</p>
+        </div>
+        <div class="col-md-3 d-flex align-items-center justify-content-end">
+          <!-- Button to view seed details -->
+          <a href="{% url 'seed_detail_view' pk=seed.id %}" class="btn btn-info">View Details</a>
+        </div>
+      </div>
+    {% empty %}
+      <p>No seeds yet.</p>
+    {% endfor %}
+  </div>
+  <div class="mt-4">
+    <!-- Link to add a new seed -->
+    <a href="{% url 'submit_content' %}" class="btn btn-primary">Add a New Seed</a>
+  </div>
+</div>
+{% endblock %}

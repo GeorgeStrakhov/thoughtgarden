@@ -1,0 +1,25 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="{% url 'seeds_list' %}">Garden</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item {% if request.resolver_match.url_name == 'seeds_list' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'seeds_list' %}">Home</a>
+            </li>
+            <li class="nav-item {% if request.resolver_match.url_name == 'submit_content' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'submit_content' %}">Plant a seed</a>
+            </li>
+            <li class="nav-item {% if request.resolver_match.url_name == 'search_seeds' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'search_seeds' %}">Search</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<style>
+.navbar {
+    padding-left: 20px; /* Adjust as needed */
+}
+</style>

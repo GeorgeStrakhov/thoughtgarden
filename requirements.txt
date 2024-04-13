@@ -1,0 +1,16 @@
+Django>=4.2.0,<5.0
+djangorestframework
+django-storages
+django-widget-tweaks==1.5.0
+boto3
+psycopg2-binary
+Pillow
+pgvector>=0.2.2
+openai
+redis
+django-q
+PyMuPDF
+python-docx
+pytube==15.0.0
+requests==2.31.0
+youtube-transcript-api==0.6.2

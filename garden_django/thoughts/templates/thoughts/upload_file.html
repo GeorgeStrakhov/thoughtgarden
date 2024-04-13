@@ -1,0 +1,62 @@
+{% extends "thoughts/base.html" %}
+
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container mt-3">
+    <h2>Submit Content for Processing</h2>
+    <!-- YouTube URL Submission -->
+    <form method="post" enctype="multipart/form-data" class="form" id="youtubeForm">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="youtubeUrl" class="form-label">YouTube URL</label>
+            <input type="text" id="youtubeUrl" name="url" class="form-control" placeholder="Enter YouTube URL" required>
+        </div>
+        <div class="form-group">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="downloadVideo" name="download">
+                <label for="downloadVideo" class="form-check-label">Download Video</label>
+            </div>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="submitYouTube()">Process YouTube URL</button>
+    </form>
+    
+    <hr>
+    
+    <form method="post" enctype="multipart/form-data" class="form" id="fileForm">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="{{ form.title.id_for_label }}" class="form-label">{{ form.title.label }}</label>
+            {% render_field form.title class="form-control" %}
+            {{ form.title.errors }}
+        </div>
+        <div class="mb-3">
+            <label for="{{ form.file.id_for_label }}" class="form-label">{{ form.file.label }}</label>
+            {% render_field form.file class="form-control" id="formFile" %}
+            {{ form.file.errors }}
+        </div>
+        <div class="form-group">
+            <div class="form-check">
+                {% render_field form.upload_to_s3 class="form-check-input" %}
+                <label for="{{ form.upload_to_s3.id_for_label }}" class="form-check-label">{{ form.upload_to_s3.label }}</label>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Upload and Process File</button>
+    </form>
+</div>
+
+<script>
+    function submitYouTube() {
+        // Change form action to YouTube processing endpoint and submit
+        var youtubeUrl = document.getElementById('youtubeUrl').value;
+        if (youtubeUrl) {
+            var form = document.getElementById('youtubeForm');
+            form.action = "{% url 'process_youtube_url' %}";
+            form.method = "POST";
+            form.submit();
+        } else {
+            alert("Please enter a YouTube URL.");
+        }
+    }
+</script>
+{% endblock %}

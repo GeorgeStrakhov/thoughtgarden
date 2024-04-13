@@ -1,0 +1,119 @@
+{% extends "thoughts/base.html" %}
+
+{% block content %}
+<div class="container mt-3">
+
+    <!-- Main seed information -->
+    <h2>{{ seed.title }}</h2>
+
+
+    <!-- Section for highlighted idea part -->
+    {% if highlighted_part %}
+        <div class="alert alert-success" role="alert">
+            <h5>We found this part:</h5>
+            <p>{{ highlighted_part.content }}</p>
+        </div>
+    {% endif %}
+
+
+
+    <!-- Links for additional content and metadata -->
+    <div class="mb-3">
+        {% if seed.content_url %}
+            <a href="{{ seed.content_url }}" class="btn btn-link">Content Link</a>
+        {% endif %}
+        {% if seed.reserve_file %}
+            <a href="{{ seed.reserve_file.url }}" class="btn btn-link">Reserve Link</a>
+        {% endif %}
+    </div>
+
+    <!-- Thumbnail image if available -->
+    {% if seed.thumbnail %}
+        <img src="{{ seed.thumbnail.url }}" alt="Thumbnail" class="img-fluid mb-3">
+    {% endif %}
+
+    <div class="accordion mt-3" id="seedDetailsAccordion">
+        {% if seed.description %}
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingDescription">
+                <button class="accordion-button collapsed" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#collapseDescription"
+                        aria-expanded="true" aria-controls="collapseDescription">
+                    View Description
+                </button>
+            </h2>
+            <div id="collapseDescription" class="accordion-collapse collapse"
+                 aria-labelledby="headingDescription">
+                <div class="accordion-body">
+                    {{ seed.description }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    
+        {% if seed.transcript %}
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingTranscript">
+                <button class="accordion-button collapsed" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#collapseTranscript"
+                        aria-expanded="false" aria-controls="collapseTranscript">
+                    View Transcript
+                </button>
+            </h2>
+            <div id="collapseTranscript" class="accordion-collapse collapse show"
+                 aria-labelledby="headingTranscript">
+                <div class="accordion-body">
+                    {{ seed.transcript }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Additional seed metadata -->
+    {% if seed.author or seed.language or seed.topics or seed.tags or seed.year %}
+        <div class="additional-metadata mt-3">
+            {% if seed.author %}<p><strong>Author:</strong> {{ seed.author }}</p>{% endif %}
+            {% if seed.language %}<p><strong>Language:</strong> {{ seed.language }}</p>{% endif %}
+            {% if seed.topics %}<p><strong>Topics:</strong> {{ seed.topics }}</p>{% endif %}
+            {% if seed.tags %}<p><strong>Tags:</strong> {{ seed.tags }}</p>{% endif %}
+            {% if seed.year %}<p><strong>Year:</strong> {{ seed.year }}</p>{% endif %}
+        </div>
+    {% endif %}
+  
+    <!-- Related snippets section -->
+    {% if parts %}
+        <h3 class="mt-5">Related Snippets</h3>
+        <div class="list-group">
+            {% for part in parts %}
+                <div class="list-group-item list-group-item-action">
+                    <p>{{ part.content|truncatewords:30 }}</p>
+                    <a href="{% url 'find_similar_seeds' snippet_id=part.id %}" class="btn btn-secondary">Find Similar</a>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination component -->
+        <nav aria-label="Page navigation for related snippets" class="mt-3">
+            <ul class="pagination">
+                {% if parts.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ parts.previous_page_number }}">Previous</a></li>
+                {% endif %}
+                {% for num in parts.paginator.page_range %}
+                    {% if num == parts.number or num == parts.number|add:-1 or num == parts.number|add:1 or num == 1 or num == parts.paginator.num_pages %}
+                        <li class="page-item {% if num == parts.number %}active{% endif %}">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                {% if parts.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ parts.next_page_number }}">Next</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ parts.paginator.num_pages }}">Last</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+
+</div>
+{% endblock %}
