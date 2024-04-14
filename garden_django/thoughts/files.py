@@ -56,17 +56,20 @@ def process_and_create_embeddings(text, seed_title):
 
     for chunk in chunks:
         # Queue a Django Q task for each chunk
-        async_task('thoughts.main_logic.create_seed_part_from', chunk, seed)
+        async_task('thoughts.main_logic.create_snippet_from', chunk, seed)
 
     return seed
 
-#PDF
-def extract_text_from_pdf(pdf_path):
+def extract_text_from_pdf(pdf_file):
     """Extracts text from a PDF file."""
-    doc = fitz.open(pdf_path)
     text = ""
-    for page in doc:
-        text += page.get_text()
+    try:
+        doc = fitz.open("pdf", pdf_file.read())  # Open the file from memory
+        for page in doc:
+            text += page.get_text()
+    except Exception as e:
+        print(f"Failed to extract text from PDF: {e}")
+        text = None
     return text
 
 #DOCX

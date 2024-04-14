@@ -10,6 +10,7 @@ def create_seed_from(title: str, context: str = None):
     try:
         # Replace single quotes with double quotes and attempt to load JSON
         llm_tags_str = get_tags(context).replace("'", "\"")
+        print(llm_tags_str)
         llm_tags = json.loads(llm_tags_str)
     except json.JSONDecodeError as e:
         # Handle JSON errors specifically

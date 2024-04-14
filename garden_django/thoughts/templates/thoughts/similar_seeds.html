@@ -10,10 +10,12 @@
     <div class="col-md-4 idea-part">
       <div class="idea-content">{{ similar_parts.0.content }}</div>
       <button class="btn btn-primary" onclick="location.href='{% url 'find_similar_seeds' similar_parts.0.id %}'">Find Similar</button>
+      <button class="btn btn-secondary" onclick="location.href='{% url 'seed_detail_view' similar_parts.0.seed.id %}'">Open Full Seed</button>
     </div>
     <div class="col-md-4 idea-part">
       <div class="idea-content">{{ similar_parts.1.content }}</div>
       <button class="btn btn-primary" onclick="location.href='{% url 'find_similar_seeds' similar_parts.1.id %}'">Find Similar</button>
+      <button class="btn btn-secondary" onclick="location.href='{% url 'seed_detail_view' similar_parts.1.seed.id %}'">Open Full Seed</button>
     </div>
   </div>
 
@@ -22,6 +24,7 @@
     <div class="col-md-4 idea-part">
       <div class="idea-content">{{ similar_parts.2.content }}</div>
       <button class="btn btn-primary" onclick="location.href='{% url 'find_similar_seeds' similar_parts.2.id %}'">Find Similar</button>
+      <button class="btn btn-secondary" onclick="location.href='{% url 'seed_detail_view' similar_parts.2.seed.id %}'">Open Full Seed</button>
     </div>
     <div class="col-md-4 target-idea">
       <p>{{ target_part.content }}</p>
@@ -29,6 +32,7 @@
     <div class="col-md-4 idea-part">
       <div class="idea-content">{{ similar_parts.3.content }}</div>
       <button class="btn btn-primary" onclick="location.href='{% url 'find_similar_seeds' similar_parts.3.id %}'">Find Similar</button>
+      <button class="btn btn-secondary" onclick="location.href='{% url 'seed_detail_view' similar_parts.3.seed.id %}'">Open Full Seed</button>
     </div>
   </div>
 
@@ -37,10 +41,12 @@
     <div class="col-md-4 idea-part">
       <div class="idea-content">{{ similar_parts.4.content }}</div>
       <button class="btn btn-primary" onclick="location.href='{% url 'find_similar_seeds' similar_parts.4.id %}'">Find Similar</button>
+      <button class="btn btn-secondary" onclick="location.href='{% url 'seed_detail_view' similar_parts.4.seed.id %}'">Open Full Seed</button>
     </div>
     <div class="col-md-4 idea-part">
       <div class="idea-content">{{ similar_parts.5.content }}</div>
       <button class="btn btn-primary" onclick="location.href='{% url 'find_similar_seeds' similar_parts.5.id %}'">Find Similar</button>
+      <button class="btn btn-secondary" onclick="location.href='{% url 'seed_detail_view' similar_parts.5.seed.id %}'">Open Full Seed</button>
     </div>
   </div>
 </div>

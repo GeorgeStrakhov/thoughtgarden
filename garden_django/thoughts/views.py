@@ -142,7 +142,9 @@ def upload_and_process_file_view(request):
             seed = process_and_create_embeddings(text, seed_title)
 
             if upload_to_s3:
-                default_storage.save(uploaded_file.name, uploaded_file)
+                file_path = default_storage.save(uploaded_file.name, uploaded_file)
+                seed.reserve_file = file_path
+                seed.save()
 
             return redirect('seed_detail_view', pk=seed.pk) 
 
