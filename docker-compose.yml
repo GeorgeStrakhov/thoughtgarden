@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  db:
+    build:
+      context: ./pgvector-db
+      args:
+        - PG_MAJOR=16
+        - PGVECTOR_VERSION=v0.6.2
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./garden_django:/code
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+
+  qcluster:
+    build: .
+    command: python manage.py qcluster
+    volumes:
+      - ./garden_django:/code
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  postgres_data:

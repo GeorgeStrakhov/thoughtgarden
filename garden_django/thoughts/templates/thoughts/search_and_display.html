@@ -1,0 +1,33 @@
+{% extends "thoughts/base.html" %}
+{% block content %}
+<div class="container mt-3">
+    <h2 class="mb-4">Search</h2>
+    <form method="post" class="form">
+      {% csrf_token %}
+      <div class="form-group">
+        {{ form.search_text.label_tag }}
+        <!-- Update the input field to retain the search_text -->
+        <input type="text" name="search_text" class="form-control" id="id_search_text" value="{{ search_text }}">
+        {{ form.search_text.errors }}
+      </div>
+      <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+    
+    {% if parts %}
+      <h3 class="mt-5">Relevant ...</h3>
+      <div class="row">
+        {% for part in parts %}
+          <div class="col-md-4 mb-4">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">{{ part.idea.title }}</h5>
+                <p class="card-text">{{ part.content|truncatewords:200 }}</p>
+                <a href="{% url 'seed_detail_view' pk=part.seed.id %}?highlight={{ part.id }}" class="btn btn-primary">Read More</a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,12 +1,34 @@
-.DS_store
+#Mac
+.DS_Store
 
-# python stuff
+# Django project files
 *.pyc
 *.pyo
-
-# cache
 __pycache__/
+*.sqlite3
 
-# env
-.env
+# Static files
+staticfiles/
+media/
 
+# Secret keys
+*.env
+
+# Development files
+*.log
+db.sqlite3
+
+# IDE files
+.vscode/
+.idea/
+
+# Dependency directories
+venv/
+node_modules/
+
+# Media files - exclude all media from version control
+garden/garden_django/media/
+
+# file to help see what installed in env
+fakerequirements.txt
+!env-example.env
