@@ -25,3 +25,7 @@ node_modules/
 
 # Media files - exclude all media from version control
 garden/garden_django/media/
+
+# file to help see what installed in env
+fakerequirements.txt
+!env-example.env

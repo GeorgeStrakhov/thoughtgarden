@@ -21,7 +21,7 @@ def split_text_into_chunks(text, max_chunk_size=300):
     current_chunk = ""
     
     # Split text by paragraphs first
-    paragraphs = text.split('\n\n')
+    paragraphs = text.split('\n')
     
     for paragraph in paragraphs:
         # Further split each paragraph by sentence-ending punctuation
@@ -57,6 +57,8 @@ def process_and_create_embeddings(text, seed_title):
     for chunk in chunks:
         # Queue a Django Q task for each chunk
         async_task('thoughts.main_logic.create_seed_part_from', chunk, seed)
+
+    return seed
 
 #PDF
 def extract_text_from_pdf(pdf_path):

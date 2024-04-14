@@ -46,7 +46,7 @@ def create_seed(request):
             for chunk in split_text_into_chunks(content):
                 async_task('thoughts.main_logic.create_snippet_from', chunk, seed)
 
-            return redirect('seeds_list')
+            return redirect('seed_detail_view', pk=seed.pk)
     else:
         form = SeedForm()
     return render(request, 'thoughts/create_seed.html', {'form': form})
@@ -115,7 +115,7 @@ def process_youtube_url(request):
         except Exception as e:
             return HttpResponse(f"Error processing YouTube URL: {str(e)}", status=500)
         
-        return HttpResponse("YouTube processed successfully.")
+        return redirect('seed_detail_view', pk=seed.pk) 
     else:
         return HttpResponse("Invalid request method.", status=405)
 
@@ -139,12 +139,12 @@ def upload_and_process_file_view(request):
                 return HttpResponse("Unsupported file type.", status=400)
 
             # Process the extracted text
-            process_and_create_embeddings(text, seed_title)
+            seed = process_and_create_embeddings(text, seed_title)
 
             if upload_to_s3:
                 default_storage.save(uploaded_file.name, uploaded_file)
 
-            return HttpResponse("File processed successfully.")
+            return redirect('seed_detail_view', pk=seed.pk) 
 
     else:
         form = FileUploadForm()
