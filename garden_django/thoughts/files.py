@@ -15,7 +15,7 @@ import re
 
 
 
-def split_text_into_chunks(text, max_chunk_size=300):
+def split_text_into_chunks(text, max_chunk_size=600):
     """Splits text into chunks not exceeding max_chunk_size, first by paragraphs, then by sentences, and finally by new lines if needed."""
     chunks = []
     current_chunk = ""

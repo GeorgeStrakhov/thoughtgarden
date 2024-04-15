@@ -7,16 +7,6 @@
     <h2>{{ seed.title }}</h2>
 
 
-    <!-- Section for highlighted idea part -->
-    {% if highlighted_part %}
-        <div class="alert alert-success" role="alert">
-            <h5>We found this part:</h5>
-            <p>{{ highlighted_part.content }}</p>
-        </div>
-    {% endif %}
-
-
-
     <!-- Links for additional content and metadata -->
     <div class="mb-3">
         {% if seed.content_url %}
@@ -86,10 +76,18 @@
         <h3 class="mt-5">Related Snippets</h3>
         <div class="list-group">
             {% for part in parts %}
-                <div class="list-group-item list-group-item-action">
-                    <p>{{ part.content|truncatewords:30 }}</p>
-                    <a href="{% url 'find_similar_seeds' snippet_id=part.id %}" class="btn btn-secondary">Find Similar</a>
-                </div>
+                <!-- Check if the current part is the highlighted part -->
+                {% if highlighted_part and part.id == highlighted_part.id %}
+                    <div class="list-group-item list-group-item-action" style="background-color: #ffff99;"> <!-- Light yellow background for highlighted part -->
+                        <p>{{ part.content }}</p>
+                        <a href="{% url 'find_similar_seeds' snippet_id=part.id %}" class="btn btn-secondary">Find Similar</a>
+                    </div>
+                {% else %}
+                    <div class="list-group-item list-group-item-action">
+                        <p>{{ part.content }}</p>
+                        <a href="{% url 'find_similar_seeds' snippet_id=part.id %}" class="btn btn-secondary">Find Similar</a>
+                    </div>
+                {% endif %}
             {% endfor %}
         </div>
         
