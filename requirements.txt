@@ -15,3 +15,4 @@ python-docx
 pytube==15.0.0
 requests==2.31.0
 youtube-transcript-api==0.6.2
+supervisor
