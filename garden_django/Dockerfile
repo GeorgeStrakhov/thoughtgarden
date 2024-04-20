@@ -13,6 +13,4 @@ COPY requirements.txt /code/
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
 # Copy project and supervisord configurations
-COPY . /code/
-COPY supervisord_django.conf /code/
-COPY supervisord_djangoq.conf /code/
+COPY . .
