@@ -2,6 +2,7 @@ Django>=4.2.0,<5.0
 djangorestframework
 django-storages
 django-widget-tweaks==1.5.0
+daphne
 boto3
 psycopg2-binary
 Pillow
