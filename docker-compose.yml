@@ -18,7 +18,7 @@ services:
       - "6379:6379"
 
   web:
-    build: .
+    build: ./garden_django
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./garden_django:/code
