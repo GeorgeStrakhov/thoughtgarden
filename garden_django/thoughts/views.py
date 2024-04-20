@@ -154,22 +154,37 @@ def upload_and_process_file_view(request):
 
 def seed_detail_view(request, pk):
     seed = get_object_or_404(Seed, pk=pk)
-    parts_list = seed.parts.all().order_by('id') 
+    parts_list = seed.parts.all().order_by('id')
     paginator = Paginator(parts_list, 10)
     page_number = request.GET.get('page')
     parts = paginator.get_page(page_number)
 
     highlighted_part_id = request.GET.get('highlight')
     highlighted_part = None
+    previous_parts = []
+    after_parts = []
 
     if highlighted_part_id:
         try:
             highlighted_part = Snippet.objects.get(id=highlighted_part_id, seed=seed)
-        except Snippet.DoesNotExist:
+            # Find the index of the highlighted part
+            highlighted_index = list(parts_list).index(highlighted_part)
+            # Calculate the correct page number based on the index
+            correct_page_number = highlighted_index // paginator.per_page + 1
+            
+            # Adjust the page number to ensure the highlighted part is on the current page
+            page_number = correct_page_number
+        except (Snippet.DoesNotExist, ValueError):
+            # Handle cases where the snippet does not exist or is not in the list
             highlighted_part = None
+
+    # Get the parts for the adjusted or initial page number
+    parts = paginator.get_page(page_number)
 
     return render(request, 'thoughts/seed_detail.html', {
         'seed': seed,
         'parts': parts,
         'highlighted_part': highlighted_part,
+        'previous_parts': previous_parts,
+        'after_parts': after_parts,
     })

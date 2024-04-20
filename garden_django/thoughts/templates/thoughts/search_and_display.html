@@ -20,7 +20,7 @@
           <div class="col-md-4 mb-4">
             <div class="card">
               <div class="card-body">
-                <h5 class="card-title">{{ part.idea.title }}</h5>
+                <h5 class="card-title">{{ part.seed.title }}</h5>
                 <p class="card-text">{{ part.content|truncatewords:200 }}</p>
                 <a href="{% url 'seed_detail_view' pk=part.seed.id %}?highlight={{ part.id }}" class="btn btn-primary">Read More</a>
               </div>
