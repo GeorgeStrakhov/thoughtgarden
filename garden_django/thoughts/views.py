@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect, HttpResponse, get_object_or_404
-from .forms import SeedForm, SearchForm, FileUploadForm, YouTubeForm
-from .models import Seed, Snippet
+from .forms import SeedForm, SearchForm, FileUploadForm, YouTubeForm, SeedBigForm
+from .models import Seed, Snippet, Garden
 from .main_logic import create_seed_from_youtube, create_seed_from
 from .LLM import get_embedding
 from .files import extract_text_from_youtube
 
 from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
 
 from django.core.files.storage import default_storage, FileSystemStorage
 
@@ -14,8 +15,12 @@ from pgvector.django import L2Distance
 from .files import extract_text_from_pdf, extract_text_from_docx, process_and_create_embeddings, \
     split_text_into_chunks
 from django_q.tasks import async_task
+from django_q.models import Task
 
 
+from .db_walker import filter_snippets_for_user, filter_seeds_for_user
+
+@login_required
 def submit_content(request):
     # Initialize forms for text, YouTube URL, and file upload
     text_form = SeedForm()
@@ -29,29 +34,37 @@ def submit_content(request):
         'file_upload_form': file_upload_form
     })
 
+
+@login_required
 def seeds_list(request):
-    seeds = Seed.objects.all()  # Fetch all seeds from the database
+    if not request.user.owned_gardens.exists():
+        #TODO: Create a default garden for the user
+        Garden.objects.create(owner=request.user, name=f"{request.user.username}'s Garden")
+
+    seeds = filter_seeds_for_user(request.user)
     return render(request, 'thoughts/seeds_list.html', {'seeds': seeds})
 
 
+@login_required
 def create_seed(request):
     if request.method == 'POST':
         form = SeedForm(request.POST)
         if form.is_valid():
             title = form.cleaned_data['title']
             content = form.cleaned_data['content']
-            seed = create_seed_from(title, content)
+            seed = create_seed_from(title, content, request.user)
 
             # Break down the caption text into chunks and process asynchronously.
-            for chunk in split_text_into_chunks(content):
-                async_task('thoughts.main_logic.create_snippet_from', chunk, seed)
+            if seed:
+                for chunk in split_text_into_chunks(content, max_chunk_size=request.user.max_chunk_size_setting):
+                    async_task('thoughts.main_logic.create_snippet_from', chunk, seed, request.user, group=str(seed.pk))
 
             return redirect('seed_detail_view', pk=seed.pk)
     else:
         form = SeedForm()
     return render(request, 'thoughts/create_seed.html', {'form': form})
 
-
+@login_required
 def search_seeds(request):
     form = SearchForm()
     parts = None  
@@ -60,25 +73,27 @@ def search_seeds(request):
     if request.method == "POST":
         form = SearchForm(request.POST)
         if form.is_valid():
-            text = form.cleaned_data['search_text']
             search_text = form.cleaned_data['search_text']
-            embedding = get_embedding(text)
-            parts = Snippet.objects.annotate(
+            embedding = get_embedding(search_text, request.user)
+
+            # Now filter Snippets whose Seed is in one of the accessible gardens
+            parts = filter_snippets_for_user(request.user).annotate(
                 distance=L2Distance(F('embedding'), embedding)
-            ).order_by('distance')[:5]
+            ).order_by('distance')[:15]
 
     return render(request, 'thoughts/search_and_display.html', {
         'form': form,
         'parts': parts,
-        'search_text': search_text,  
+        'search_text': search_text,
     })
 
+@login_required
 def find_similar_seeds(request, snippet_id):
     # Fetch the Idea Part based on the given ID
     target_part = get_object_or_404(Snippet, pk=snippet_id)
     target_embedding = target_part.embedding  # Assuming the embedding is stored in the 'embedding' field
     
-    similar_parts = Snippet.objects.annotate(
+    similar_parts = filter_snippets_for_user(request.user).annotate(
         distance=L2Distance(F('embedding'), target_embedding)
     ).exclude(id=snippet_id).order_by('distance')[:6]
     
@@ -102,15 +117,16 @@ def process_youtube_url(request):
             # Extract captions or relevant text from the YouTube video.
             caption_text = extract_text_from_youtube(youtube_url)
             # Create a new idea or entity in your system based on the YouTube video.
-            seed = create_seed_from_youtube(youtube_url, caption_text)
+            seed = create_seed_from_youtube(youtube_url, caption_text, request.user)
 
             # Download video to default storage if 'download_video' is checked.
             if download_video:
-                async_task('thoughts.files.download_and_save_video_to_seed', youtube_url, seed)
+                async_task('thoughts.files.download_and_save_video_to_seed', youtube_url, seed, group=str(seed.pk))
 
             # Break down the caption text into chunks and process asynchronously.
-            for chunk in split_text_into_chunks(caption_text):
-                async_task('thoughts.main_logic.create_snippet_from', chunk, seed)
+            if seed:
+                for chunk in split_text_into_chunks(caption_text, max_chunk_size=request.user.max_chunk_size_setting):
+                    async_task('thoughts.main_logic.create_snippet_from', chunk, seed, request.user, group=str(seed.pk))
             # Optional: Further processing with caption_text or idea.
         except Exception as e:
             return HttpResponse(f"Error processing YouTube URL: {str(e)}", status=500)
@@ -139,7 +155,7 @@ def upload_and_process_file_view(request):
                 return HttpResponse("Unsupported file type.", status=400)
 
             # Process the extracted text
-            seed = process_and_create_embeddings(text, seed_title)
+            seed = process_and_create_embeddings(text, seed_title, request.user)
 
             if upload_to_s3:
                 file_path = default_storage.save(uploaded_file.name, uploaded_file)
@@ -152,8 +168,11 @@ def upload_and_process_file_view(request):
         form = FileUploadForm()
     return render(request, 'thoughts/upload_file.html', {'form': form})
 
+@login_required
 def seed_detail_view(request, pk):
-    seed = get_object_or_404(Seed, pk=pk)
+    #Look for seed only in the user's gardens
+    seed = get_object_or_404(filter_seeds_for_user(request.user), pk=pk)
+
     parts_list = seed.parts.all().order_by('id')
     paginator = Paginator(parts_list, 10)
     page_number = request.GET.get('page')
@@ -188,3 +207,21 @@ def seed_detail_view(request, pk):
         'previous_parts': previous_parts,
         'after_parts': after_parts,
     })
+
+@login_required
+def seed_edit_view(request, pk):
+    seed_id = pk
+    seed = get_object_or_404(Seed, id=seed_id)
+    if request.method == 'POST':
+        form = SeedBigForm(request.POST, request.FILES, instance=seed)
+        if form.is_valid():
+            form.save()
+            return redirect('seed_detail_view', pk=seed.id)  # Assuming you have a detail view for Seed
+    else:
+        form = SeedBigForm(instance=seed)
+    return render(request, 'thoughts/seed_edit.html', {'form': form, 'seed': seed})
+
+
+@login_required
+def home(request):
+    return redirect('seeds_list')  # Redirect to the seeds list view

@@ -9,7 +9,7 @@ Pillow
 pgvector>=0.2.2
 openai
 redis
-django-q
+django-q2
 PyMuPDF
 python-docx
 pytube==15.0.0

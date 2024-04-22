@@ -1,0 +1,35 @@
+{% extends "thoughts/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <h2 class="mb-3">Update API Key and Settings</h2>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="{{ form.api_key.id_for_label }}">{{ form.api_key.label }}</label>
+                    {{ form.api_key }}
+                    {% if form.api_key.help_text %}
+                        <small class="form-text text-muted">{{ form.api_key.help_text|safe }}</small>
+                    {% endif %}
+                    {% for error in form.api_key.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.max_chunk_size_setting.id_for_label }}">{{ form.max_chunk_size_setting.label }}</label>
+                    {{ form.max_chunk_size_setting }}
+                    {% if form.max_chunk_size_setting.help_text %}
+                        <small class="form-text text-muted">{{ form.max_chunk_size_setting.help_text }}</small>
+                    {% endif %}
+                    {% for error in form.max_chunk_size_setting.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="btn btn-primary">Save Settings</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

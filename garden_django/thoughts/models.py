@@ -1,9 +1,29 @@
 from django.db import models
 from pgvector.django import VectorField 
+from django.conf import settings
 
 
-# Create your models here.
+class Garden(models.Model):
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='owned_gardens')
+    name = models.CharField(max_length=255)
+    visitors = models.ManyToManyField(settings.AUTH_USER_MODEL, through='GardenMembership', related_name='visited_gardens')
+
+    def __str__(self):
+        return self.name
+
+class GardenMembership(models.Model):
+    garden = models.ForeignKey(Garden, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    can_edit = models.BooleanField(default=False)  # Determines if the user can edit garden content
+
+    class Meta:
+        unique_together = ('garden', 'user')
+
+    def __str__(self):
+        return f"{self.user}'s role in {self.garden.name}"
+
 class Seed(models.Model):
+    garden = models.ForeignKey(Garden, on_delete=models.CASCADE, related_name='seeds')
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     

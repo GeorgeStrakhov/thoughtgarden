@@ -4,18 +4,18 @@
 
 {% block content %}
 
-<div class="container mt-5">
+<div class="similar-container">
   <div class="row justify-content-center mb-3">
     <!-- First Row with 2 Idea Parts -->
     <div class="col-md-4 idea-part">
       <div class="idea-content">{{ similar_parts.0.content }}</div>
       <button class="btn btn-primary" onclick="location.href='{% url 'find_similar_seeds' similar_parts.0.id %}'">Find Similar</button>
-      <button class="btn btn-secondary" onclick="location.href='{% url 'seed_detail_view' similar_parts.0.seed.id %}'">Open Full Seed</button>
+      <button class="btn btn-secondary" onclick="location.href='{% url 'seed_detail_view' similar_parts.0.seed.id %}?highlight={{ similar_parts.0.id }}'">Open Full Seed</button>
     </div>
     <div class="col-md-4 idea-part">
       <div class="idea-content">{{ similar_parts.1.content }}</div>
       <button class="btn btn-primary" onclick="location.href='{% url 'find_similar_seeds' similar_parts.1.id %}'">Find Similar</button>
-      <button class="btn btn-secondary" onclick="location.href='{% url 'seed_detail_view' similar_parts.1.seed.id %}'">Open Full Seed</button>
+      <button class="btn btn-secondary" onclick="location.href='{% url 'seed_detail_view' similar_parts.1.seed.id %}?highlight={{ similar_parts.1.id }}'">Open Full Seed</button>
     </div>
   </div>
 
@@ -24,15 +24,16 @@
     <div class="col-md-4 idea-part">
       <div class="idea-content">{{ similar_parts.2.content }}</div>
       <button class="btn btn-primary" onclick="location.href='{% url 'find_similar_seeds' similar_parts.2.id %}'">Find Similar</button>
-      <button class="btn btn-secondary" onclick="location.href='{% url 'seed_detail_view' similar_parts.2.seed.id %}'">Open Full Seed</button>
+      <button class="btn btn-secondary" onclick="location.href='{% url 'seed_detail_view' similar_parts.2.seed.id %}?highlight={{ similar_parts.2.id }}'">Open Full Seed</button>
     </div>
     <div class="col-md-4 target-idea">
-      <p>{{ target_part.content }}</p>
+      <div class="idea-content">{{ target_part.content }}</div>
+      <button class="btn btn-secondary" onclick="location.href='{% url 'seed_detail_view' target_part.seed.id %}?highlight={{ target_part.id }}'">Open Full Seed</button>
     </div>
     <div class="col-md-4 idea-part">
       <div class="idea-content">{{ similar_parts.3.content }}</div>
       <button class="btn btn-primary" onclick="location.href='{% url 'find_similar_seeds' similar_parts.3.id %}'">Find Similar</button>
-      <button class="btn btn-secondary" onclick="location.href='{% url 'seed_detail_view' similar_parts.3.seed.id %}'">Open Full Seed</button>
+      <button class="btn btn-secondary" onclick="location.href='{% url 'seed_detail_view' similar_parts.3.seed.id %}?highlight={{ similar_parts.3.id }}'">Open Full Seed</button>
     </div>
   </div>
 
@@ -41,19 +42,19 @@
     <div class="col-md-4 idea-part">
       <div class="idea-content">{{ similar_parts.4.content }}</div>
       <button class="btn btn-primary" onclick="location.href='{% url 'find_similar_seeds' similar_parts.4.id %}'">Find Similar</button>
-      <button class="btn btn-secondary" onclick="location.href='{% url 'seed_detail_view' similar_parts.4.seed.id %}'">Open Full Seed</button>
+      <button class="btn btn-secondary" onclick="location.href='{% url 'seed_detail_view' similar_parts.4.seed.id %}?highlight={{ similar_parts.4.id }}'">Open Full Seed</button>
     </div>
     <div class="col-md-4 idea-part">
       <div class="idea-content">{{ similar_parts.5.content }}</div>
       <button class="btn btn-primary" onclick="location.href='{% url 'find_similar_seeds' similar_parts.5.id %}'">Find Similar</button>
-      <button class="btn btn-secondary" onclick="location.href='{% url 'seed_detail_view' similar_parts.5.seed.id %}'">Open Full Seed</button>
+      <button class="btn btn-secondary" onclick="location.href='{% url 'seed_detail_view' similar_parts.5.seed.id %}?highlight={{ similar_parts.5.id }}'">Open Full Seed</button>
     </div>
   </div>
 </div>
 
 
 <style>
-  .container {
+  .similar-container {
     height: 90vh; /* 90% of the viewport height */
     display: flex;
     flex-direction: column;
@@ -84,11 +85,13 @@
 
   .target-idea {
     flex-grow: 2; /* Larger area for the target idea */
-    border: 1px solid #007bff; /* Bootstrap primary color */
     border-radius: 0.25rem;
-    padding: 20px;
     overflow-y: auto; /* Scrollable if content is too long */
     height: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Ensures content and button are spaced out */
   }
 
   .btn-primary {

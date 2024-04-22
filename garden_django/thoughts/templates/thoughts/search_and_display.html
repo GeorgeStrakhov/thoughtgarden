@@ -23,6 +23,7 @@
                 <h5 class="card-title">{{ part.seed.title }}</h5>
                 <p class="card-text">{{ part.content|truncatewords:200 }}</p>
                 <a href="{% url 'seed_detail_view' pk=part.seed.id %}?highlight={{ part.id }}" class="btn btn-primary">Read More</a>
+                <button class="btn btn-primary" onclick="location.href='{% url 'find_similar_seeds' part.id %}'">Find Similar</button>
               </div>
             </div>
           </div>

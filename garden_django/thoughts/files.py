@@ -19,7 +19,7 @@ def split_text_into_chunks(text, max_chunk_size=600):
     """Splits text into chunks not exceeding max_chunk_size, first by paragraphs, then by sentences, and finally by new lines if needed."""
     chunks = []
     current_chunk = ""
-    
+
     # Split text by paragraphs first
     paragraphs = text.split('\n')
     
@@ -44,19 +44,20 @@ def split_text_into_chunks(text, max_chunk_size=600):
 
     return chunks
 
-def process_and_create_embeddings(text, seed_title):
-    chunks = split_text_into_chunks(text)
+def process_and_create_embeddings(text, seed_title, user):
+    chunks = split_text_into_chunks(text, max_chunk_size=user.max_chunk_size_setting)
 
     if chunks:
         first_page_text = chunks[0]
     else:
         first_page_text = ""
         
-    seed = create_seed_from(seed_title, first_page_text)
+    seed = create_seed_from(seed_title, first_page_text, user)
 
-    for chunk in chunks:
-        # Queue a Django Q task for each chunk
-        async_task('thoughts.main_logic.create_snippet_from', chunk, seed)
+    if seed:
+        for chunk in chunks:
+            # Queue a Django Q task for each chunk
+            async_task('thoughts.main_logic.create_snippet_from', chunk, seed, user, group=str(seed.pk))
 
     return seed
 

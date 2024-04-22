@@ -1,4 +1,6 @@
 from django import forms
+from .models import Seed
+
 
 class SearchForm(forms.Form):
     search_text = forms.CharField(label="Search", max_length=1000)
@@ -14,6 +16,13 @@ class SeedForm(forms.Form):
         widget=forms.Textarea(attrs={'class': 'form-control'})  # Textarea with Bootstrap class
     )
 
+class SeedBigForm(forms.ModelForm):
+    class Meta:
+        model = Seed
+        fields = ['garden', 'title', 'description', 'content_url', 'reserve_file', 
+                  'thumbnail', 'transcript', 'author', 'language', 
+                  'topics', 'tags', 'year']
+        
 class FileUploadForm(forms.Form):
     title = forms.CharField(
         label="Title",
@@ -25,8 +34,8 @@ class FileUploadForm(forms.Form):
     )
     upload_to_s3 = forms.BooleanField(
         required=False,
-        label="Upload to S3",
-        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})  # Checkbox with Bootstrap class
+        label="Save to storage",
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})  # 
     )
 
 class YouTubeForm(forms.Form):

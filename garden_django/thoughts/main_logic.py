@@ -1,15 +1,16 @@
-from .models import Seed, Snippet
+from .models import Seed, Snippet, Garden
 from .LLM import get_embedding, get_tags
 from pytube import YouTube
 import json
 import requests
 from django.core.files.base import ContentFile
 from django.conf import settings
+from django.db import IntegrityError
 
-def create_seed_from(title: str, context: str = None):
+def create_seed_from(title: str, context: str = None, User: settings.AUTH_USER_MODEL = None):
     try:
         # Replace single quotes with double quotes and attempt to load JSON
-        llm_tags_str = get_tags(context).replace("'", "\"")
+        llm_tags_str = get_tags(context, User).replace("'", "\"")
         print(llm_tags_str)
         llm_tags = json.loads(llm_tags_str)
     except json.JSONDecodeError as e:
@@ -22,8 +23,11 @@ def create_seed_from(title: str, context: str = None):
         llm_tags = {}  # Fallback to an empty dictionary to allow creation of a basic Seed
 
     try:
+        garden = Garden.objects.filter(owner=User).first()
+
         # Create the Seed object, handling missing or malformed fields gracefully
         seed = Seed.objects.create(
+            garden=garden,
             title=title,
             description=llm_tags.get('Description', ""),
             content_url=llm_tags.get('Content URL', ""),
@@ -56,7 +60,7 @@ def save_thumbnail(url, title):
         return filename, thumbnail_content
     return None, None
 
-def create_seed_from_youtube(url, video_text):
+def create_seed_from_youtube(url : str, video_text : str, user : settings.AUTH_USER_MODEL = None):
     yt = YouTube(url)
     
     #Somehow this fix tags
@@ -64,7 +68,9 @@ def create_seed_from_youtube(url, video_text):
 
     thumbnail_filename, thumbnail_content = save_thumbnail(yt.thumbnail_url, yt.title)
     
+    garden = Garden.objects.filter(owner=user).first()
     seed = Seed(
+        garden=garden,
         title=yt.title,
         description=yt.description,
         content_url=url,
@@ -82,7 +88,7 @@ def create_seed_from_youtube(url, video_text):
     return seed
 
 
-def create_snippet_from(text: str, seed: Seed):
-    embedding = get_embedding(text)
+def create_snippet_from(text: str, seed: Seed, user: settings.AUTH_USER_MODEL = None):
+    embedding = get_embedding(text, user)
     snippet = Snippet.objects.create(content=text, seed=seed, embedding=embedding)
     return snippet

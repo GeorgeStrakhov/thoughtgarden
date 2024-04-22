@@ -14,6 +14,8 @@ from pathlib import Path
 import os
 from django.core.exceptions import ImproperlyConfigured
 
+from urllib.parse import urlparse
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -23,13 +25,26 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
-def get_env_variable(var_name):
-    """Get the environment variable or return exception."""
+def get_env_variable(var_name, default=None):
+    """Get an environment variable or return a default value.
+
+    Args:
+    var_name (str): The name of the environment variable.
+    default (any, optional): The default value to return if the environment variable is not found. Defaults to None.
+
+    Raises:
+    ImproperlyConfigured: If the environment variable is not found and no default is provided.
+
+    Returns:
+    any: The value of the environment variable or the default value.
+    """
     try:
-        return os.environ[var_name]
+        return os.getenv(var_name, default)
     except KeyError:
-        error_msg = f'Set the {var_name} environment variable'
-        raise ImproperlyConfigured(error_msg)
+        if default is None:
+            error_msg = f"Set the {var_name} environment variable"
+            raise ImproperlyConfigured(error_msg)
+        return default
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = get_env_variable('SECRET_KEY')
@@ -38,6 +53,8 @@ SECRET_KEY = get_env_variable('SECRET_KEY')
 DEBUG = get_env_variable('DEBUG') == '1'  # Assuming DEBUG=1 for True
 
 ALLOWED_HOSTS = get_env_variable('DJANGO_ALLOWED_HOSTS').split(' ')
+
+AUTH_USER_MODEL = 'accounts.CustomUser'
 
 
 # Application definition
@@ -53,6 +70,7 @@ INSTALLED_APPS = [
     'django_q',
     'storages', 
     'thoughts', 
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -180,16 +198,26 @@ else:
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+REDIS_URL = get_env_variable('REDIS_URL', 'redis://redis:6379/0')
+
+redis_url = urlparse(REDIS_URL)
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [REDIS_URL]
+        },
+    },
+}
+
+
 Q_CLUSTER = {
     'name': 'garden',
-    'workers': 4,
+    'workers': int(get_env_variable('Q_CLUSTER_WORKERS', 4)),
     'timeout': 90,
     'retry': 120,
     'queue_limit': 50,
     'bulk': 10,
-    'redis': {
-        'host': 'redis', 
-        'port': 6379,
-        'db': 0,
-    }
+    'redis': REDIS_URL,
 }

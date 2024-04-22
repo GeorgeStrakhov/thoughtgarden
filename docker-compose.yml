@@ -31,7 +31,7 @@ services:
       - redis
 
   qcluster:
-    build: .
+    build: ./garden_django
     command: python manage.py qcluster
     volumes:
       - ./garden_django:/code

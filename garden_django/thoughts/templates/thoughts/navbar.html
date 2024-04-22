@@ -4,7 +4,7 @@
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav">
+        <ul class="navbar-nav ml-auto">
             <li class="nav-item {% if request.resolver_match.url_name == 'seeds_list' %}active{% endif %}">
                 <a class="nav-link" href="{% url 'seeds_list' %}">Home</a>
             </li>
@@ -14,6 +14,22 @@
             <li class="nav-item {% if request.resolver_match.url_name == 'search_seeds' %}active{% endif %}">
                 <a class="nav-link" href="{% url 'search_seeds' %}">Search</a>
             </li>
+            <!-- Add a separator and style the auth links differently -->
+            {% if not request.user.is_authenticated %}
+            <li class="nav-item ml-4">
+                <span class="navbar-text">|</span>
+            </li>
+            <li class="nav-item {% if request.resolver_match.url_name == 'login' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'login' %}">Login</a>
+            </li>
+            <li class="nav-item {% if request.resolver_match.url_name == 'signup' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'signup' %}">Sign Up</a>
+            </li>
+            {% endif %}
+
+            <li class="nav-item {% if request.resolver_match.url_name == 'update_api_key' %}active{% endif %}">
+                <a class="nav-link" href="{% url 'update_api_key' %}">Settings</a>
+            </li>
         </ul>
     </div>
 </nav>
@@ -21,5 +37,32 @@
 <style>
 .navbar {
     padding-left: 20px; /* Adjust as needed */
+}
+
+/* Additional Styling */
+.nav-link {
+    margin-right: 10px; /* Space between links */
+}
+
+/* Separator Style */
+.navbar-text {
+    padding: 0 10px;
+    color: #adb5bd; /* Adjust the color to fit the theme */
+}
+
+/* Highlighting for Login and Signup when active */
+.nav-item.active .nav-link {
+    color: #007bff; /* Bootstrap blue for active links */
+    font-weight: bold;
+}
+
+/* Make Login and Signup links stand out */
+.nav-item a.nav-link {
+    font-weight: normal; /* Default weight for non-active links */
+}
+
+/* Specific styles for login and signup links */
+.nav-item a.nav-link.login, .nav-item a.nav-link.signup {
+    font-weight: bold; /* Make login and signup bold */
 }
 </style>
