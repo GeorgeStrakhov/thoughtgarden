@@ -1,36 +1,42 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand" href="{% url 'seeds_list' %}">Garden</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ml-auto">
-            <li class="nav-item {% if request.resolver_match.url_name == 'seeds_list' %}active{% endif %}">
-                <a class="nav-link" href="{% url 'seeds_list' %}">Home</a>
-            </li>
-            <li class="nav-item {% if request.resolver_match.url_name == 'submit_content' %}active{% endif %}">
-                <a class="nav-link" href="{% url 'submit_content' %}">Plant a seed</a>
-            </li>
-            <li class="nav-item {% if request.resolver_match.url_name == 'search_seeds' %}active{% endif %}">
-                <a class="nav-link" href="{% url 'search_seeds' %}">Search</a>
-            </li>
-            <!-- Add a separator and style the auth links differently -->
-            {% if not request.user.is_authenticated %}
-            <li class="nav-item ml-4">
-                <span class="navbar-text">|</span>
-            </li>
-            <li class="nav-item {% if request.resolver_match.url_name == 'login' %}active{% endif %}">
-                <a class="nav-link" href="{% url 'login' %}">Login</a>
-            </li>
-            <li class="nav-item {% if request.resolver_match.url_name == 'signup' %}active{% endif %}">
-                <a class="nav-link" href="{% url 'signup' %}">Sign Up</a>
-            </li>
-            {% endif %}
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Garden</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        
+        <div class="offcanvas-body">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item {% if request.resolver_match.url_name == 'seeds_list' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'seeds_list' %}">Home</a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'submit_content' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'submit_content' %}">Plant a seed</a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'search_seeds' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'search_seeds' %}">Search</a>
+                </li>
+                <li class="nav-item">
+                    <span class="navbar-text d-none d-lg-inline">|</span> <!-- Visible only on lg screens and above -->
+                </li>
+                {% if not request.user.is_authenticated %}
+                <li class="nav-item {% if request.resolver_match.url_name == 'login' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'login' %}">Login</a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == 'signup' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'signup' %}">Sign Up</a>
+                </li>
+                {% endif %}
 
-            <li class="nav-item {% if request.resolver_match.url_name == 'update_api_key' %}active{% endif %}">
-                <a class="nav-link" href="{% url 'update_api_key' %}">Settings</a>
-            </li>
-        </ul>
+                <li class="nav-item {% if request.resolver_match.url_name == 'update_api_key' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'update_api_key' %}">Settings</a>
+                </li>
+            </ul>
+        </div>
     </div>
 </nav>
 
@@ -52,7 +58,7 @@
 
 /* Highlighting for Login and Signup when active */
 .nav-item.active .nav-link {
-    color: #007bff; /* Bootstrap blue for active links */
+    color: #007bff !important; /* Bootstrap blue for active links */
     font-weight: bold;
 }
 
