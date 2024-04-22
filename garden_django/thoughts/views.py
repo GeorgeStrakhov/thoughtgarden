@@ -185,7 +185,7 @@ def upload_and_process_file_view(request):
             upload_to_s3 = form.cleaned_data.get('upload_to_s3')
 
             # Queue the file processing task
-            task_id = async_task('thoughts.tasks.process_file_async', uploaded_file, seed_title, request.user.id, upload_to_s3)
+            task_id = async_task('thoughts.views.process_file_async', uploaded_file, seed_title, request.user.id, upload_to_s3)
 
             # Provide feedback to user that the file is being processed
             return HttpResponse(f"File is being processed. Task ID: {task_id}", status=202)
