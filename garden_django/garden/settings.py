@@ -104,6 +104,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'garden.wsgi.application'
 
 
+DOMAIN = get_env_variable('DOMAIN', 'localhost')
+
+CSRF_TRUSTED_ORIGINS=['https://*.'+DOMAIN, 'https://'+DOMAIN, 'http://*.'+DOMAIN, 'http://'+DOMAIN]
+
+
+
+
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
