@@ -170,6 +170,8 @@ def upload_and_process_file_view(request):
         if form.is_valid():
             uploaded_file = request.FILES['file']
             seed_title = form.cleaned_data.get('title', 'Untitled')
+            if seed_title == '':
+                seed_title = 'Untitled'
             upload_to_s3 = form.cleaned_data.get('upload_to_s3')
             
             user = request.user
