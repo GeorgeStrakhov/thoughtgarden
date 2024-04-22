@@ -142,6 +142,39 @@ def process_youtube_url(request):
     else:
         return HttpResponse("Invalid request method.", status=405)
 
+def process_file_async(uploaded_file, seed_title, user_id, upload_to_s3):
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    user = User.objects.get(id=user_id)
+    
+    # Determine file type and process
+    if uploaded_file.name.endswith('.pdf'):
+        text = extract_text_from_pdf(uploaded_file)
+    elif uploaded_file.name.endswith('.docx'):
+        text = extract_text_from_docx(uploaded_file)
+    else:
+        return "Unsupported file type."
+
+    # Process the extracted text
+    seed = process_and_create_embeddings(text, seed_title, user)
+
+    if upload_to_s3:
+        username = user.username
+        safe_filename = slugify(uploaded_file.name.rsplit('.', 1)[0])[:50]
+        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        extension = uploaded_file.name.rsplit('.', 1)[-1] if '.' in uploaded_file.name else ''
+        unique_filename = f"{username}/{safe_filename}_{timestamp}_{uuid.uuid4().hex[:8]}.{extension}"
+        try:
+            saved_path = default_storage.save(unique_filename, uploaded_file)
+            seed.reserve_file = saved_path
+            seed.save()
+        except Exception as e:
+            logger.error(f"Failed to save file for user {username}: {str(e)}")
+            raise
+
+    return seed.id
+
+
 @login_required
 def upload_and_process_file_view(request):
     if request.method == 'POST':
@@ -149,40 +182,17 @@ def upload_and_process_file_view(request):
         if form.is_valid():
             uploaded_file = request.FILES['file']
             seed_title = form.cleaned_data.get('title', 'Untitled')
-            upload_to_s3 = form.cleaned_data['upload_to_s3']
+            upload_to_s3 = form.cleaned_data.get('upload_to_s3')
 
-            # Determine the file type and process accordingly
-            if uploaded_file.name.endswith('.pdf'):
-                # Process a PDF file
-                text = extract_text_from_pdf(uploaded_file)
-            elif uploaded_file.name.endswith('.docx'):
-                # Process a DOCX file
-                text = extract_text_from_docx(uploaded_file)
-            else:
-                return HttpResponse("Unsupported file type.", status=400)
+            # Queue the file processing task
+            task_id = async_task('your_app_name.tasks.process_file_async', uploaded_file, seed_title, request.user.id, upload_to_s3)
 
-            # Process the extracted text
-            seed = process_and_create_embeddings(text, seed_title, request.user)
-
-            if upload_to_s3:
-                username = request.user.username
-                safe_filename = slugify(uploaded_file.name.rsplit('.', 1)[0])
-                timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-                extension = uploaded_file.name.rsplit('.', 1)[-1] if '.' in uploaded_file.name else ''
-                unique_filename = f"{username}/{safe_filename}_{timestamp}_{uuid.uuid4().hex}.{extension}"
-                try:
-                    saved_path = default_storage.save(unique_filename, uploaded_file)
-                    seed.reserve_file = saved_path
-                    seed.save()
-                except Exception as e:
-                    # Log the error
-                    logger.error(f"Failed to save file: {e}")
-                    return HttpResponse("Error saving file.", status=500)
-
-            return redirect('seed_detail_view', pk=seed.pk) 
+            # Provide feedback to user that the file is being processed
+            return HttpResponse(f"File is being processed. Task ID: {task_id}", status=202)
 
     else:
         form = FileUploadForm()
+
     return render(request, 'thoughts/upload_file.html', {'form': form})
 
 @login_required
