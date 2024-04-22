@@ -13,6 +13,13 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 import re
 
+from django.utils.text import slugify
+import datetime
+import uuid
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 
 def split_text_into_chunks(text, max_chunk_size=600):
@@ -129,17 +136,48 @@ def download_and_save_video_to_seed(youtube_url, seed):
         
         if response.status_code != 200:
             raise IOError("Failed to download video")
-        
-        # Create a unique filename for the video
-        filename = f"youtube/{yt.title.replace(' ', '_').replace('/', '_')}.mp4"
+    
         
         # Save the video file to Django's default storage
-        video_content = ContentFile(response.content)  
-        file_path = default_storage.save(filename, video_content)
-        
-        # Update the Seed model instance
-        seed.reserve_file = file_path  
-        seed.save()
+        username = seed.garden.owner.username
+
+        # Create a sanitized and unique filename for the video
+        safe_title = slugify(yt.title)
+        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        unique_suffix = uuid.uuid4().hex  # Ensures uniqueness
+        filename = f"{username}/youtube/{safe_title}_{timestamp}_{unique_suffix}.mp4"
+
+        try:
+            video_content = ContentFile(response.content)
+            file_path = default_storage.save(filename, video_content)
+            
+            # Update the Seed model instance
+            seed.reserve_file = file_path  
+            seed.save()
+        except Exception as e:
+            # Log the error or handle it appropriately
+            logger.error(f"Failed to save video for seed {seed.id}: {str(e)}")
+            # Optionally, re-raise the error or handle it as per your application's requirements
+            raise        # Save the video file to Django's default storage
+        username = seed.garden.owner.username
+
+        # Create a sanitized and unique filename for the video
+        safe_title = slugify(yt.title)
+        timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        unique_suffix = uuid.uuid4().hex  # Ensures uniqueness
+        filename = f"{username}/youtube/{safe_title}_{timestamp}_{unique_suffix}.mp4"
+
+        try:
+            video_content = ContentFile(response.content)
+            file_path = default_storage.save(filename, video_content)
+            
+            # Update the Seed model instance
+            seed.reserve_file = file_path  
+            seed.save()
+        except Exception as e:
+            # Log the error or handle it appropriately
+            logger.error(f"Failed to save video for seed {seed.id}: {str(e)}")
+            # Optionally, re-raise the error or handle it as per your application's requirements
         
         return "Video downloaded and saved successfully."
     except Exception as e:

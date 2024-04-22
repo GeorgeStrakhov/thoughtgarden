@@ -17,8 +17,14 @@ from .files import extract_text_from_pdf, extract_text_from_docx, process_and_cr
 from django_q.tasks import async_task
 from django_q.models import Task
 
+import datetime
+import uuid
+from django.utils.text import slugify
+import logging
 
 from .db_walker import filter_snippets_for_user, filter_seeds_for_user
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def submit_content(request):
@@ -102,6 +108,7 @@ def find_similar_seeds(request, snippet_id):
         'target_part': target_part,
     })
 
+@login_required
 def process_youtube_url(request):
     if request.method == 'POST':
         # Retrieve the URL and whether to download the video from the form.
@@ -135,7 +142,7 @@ def process_youtube_url(request):
     else:
         return HttpResponse("Invalid request method.", status=405)
 
-
+@login_required
 def upload_and_process_file_view(request):
     if request.method == 'POST':
         form = FileUploadForm(request.POST, request.FILES)
@@ -158,9 +165,19 @@ def upload_and_process_file_view(request):
             seed = process_and_create_embeddings(text, seed_title, request.user)
 
             if upload_to_s3:
-                file_path = default_storage.save(uploaded_file.name, uploaded_file)
-                seed.reserve_file = file_path
-                seed.save()
+                username = request.user.username
+                safe_filename = slugify(uploaded_file.name.rsplit('.', 1)[0])
+                timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+                extension = uploaded_file.name.rsplit('.', 1)[-1] if '.' in uploaded_file.name else ''
+                unique_filename = f"{username}/{safe_filename}_{timestamp}_{uuid.uuid4().hex}.{extension}"
+                try:
+                    saved_path = default_storage.save(unique_filename, uploaded_file)
+                    seed.reserve_file = saved_path
+                    seed.save()
+                except Exception as e:
+                    # Log the error
+                    logger.error(f"Failed to save file: {e}")
+                    return HttpResponse("Error saving file.", status=500)
 
             return redirect('seed_detail_view', pk=seed.pk) 
 
