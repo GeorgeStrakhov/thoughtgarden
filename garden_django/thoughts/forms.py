@@ -27,7 +27,8 @@ class FileUploadForm(forms.Form):
     title = forms.CharField(
         label="Title",
         max_length=255,
-        widget=forms.TextInput(attrs={'class': 'form-control'})  # Bootstrap class for consistent styling
+        required=False,  
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter title (optional)'})  # Added placeholder text
     )
     file = forms.FileField(
         widget=forms.FileInput(attrs={'class': 'form-control'})  # Bootstrap class for file input

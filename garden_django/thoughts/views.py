@@ -24,6 +24,8 @@ import logging
 
 from .db_walker import filter_snippets_for_user, filter_seeds_for_user
 
+from django.contrib.auth import get_user_model
+
 logger = logging.getLogger(__name__)
 
 @login_required
@@ -142,22 +144,9 @@ def process_youtube_url(request):
     else:
         return HttpResponse("Invalid request method.", status=405)
 
-def process_file_async(uploaded_file, seed_title, user_id, upload_to_s3):
-    from django.contrib.auth import get_user_model
+def process_file_async(uploaded_file, seed, user_id, upload_to_s3):
     User = get_user_model()
-    user = User.objects.get(id=user_id)
-    
-    # Determine file type and process
-    if uploaded_file.name.endswith('.pdf'):
-        text = extract_text_from_pdf(uploaded_file)
-    elif uploaded_file.name.endswith('.docx'):
-        text = extract_text_from_docx(uploaded_file)
-    else:
-        return "Unsupported file type."
-
-    # Process the extracted text
-    seed = process_and_create_embeddings(text, seed_title, user)
-
+    user = User.objects.get(id=user_id)  # Retrieve user object using ID
     if upload_to_s3:
         username = user.username
         safe_filename = slugify(uploaded_file.name.rsplit('.', 1)[0])[:50]
@@ -171,8 +160,7 @@ def process_file_async(uploaded_file, seed_title, user_id, upload_to_s3):
         except Exception as e:
             logger.error(f"Failed to save file for user {username}: {str(e)}")
             raise
-
-    return seed.id
+    return None
 
 
 @login_required
@@ -183,12 +171,23 @@ def upload_and_process_file_view(request):
             uploaded_file = request.FILES['file']
             seed_title = form.cleaned_data.get('title', 'Untitled')
             upload_to_s3 = form.cleaned_data.get('upload_to_s3')
+            
+            user = request.user
+            
+            # Determine file type and process
+            if uploaded_file.name.endswith('.pdf'):
+                text = extract_text_from_pdf(uploaded_file)
+            elif uploaded_file.name.endswith('.docx'):
+                text = extract_text_from_docx(uploaded_file)
+            else:
+                return "Unsupported file type."
 
-            # Queue the file processing task
-            task_id = async_task('thoughts.views.process_file_async', uploaded_file, seed_title, request.user.id, upload_to_s3)
+            # Process the extracted text
+            seed = process_and_create_embeddings(text, seed_title, user)
+            task_id = async_task('thoughts.views.process_file_async', uploaded_file, seed, request.user.id, upload_to_s3)
 
             # Provide feedback to user that the file is being processed
-            return HttpResponse(f"File is being processed. Task ID: {task_id}", status=202)
+            return redirect('seed_detail_view', pk=seed.pk) 
 
     else:
         form = FileUploadForm()
