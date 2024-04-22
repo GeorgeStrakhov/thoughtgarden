@@ -9,3 +9,5 @@ docker-compose exec web python manage.py createsuperuser
 
 -- if you USE_S3 you need to collectstatic
 docker-compose exec web python manage.py collectstatic
+
+So, garden now on web too...
