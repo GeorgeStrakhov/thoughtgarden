@@ -91,6 +91,82 @@ def extract_text_from_docx(docx_path):
 
 
 #Youtube
+import pandas as pd
+from calc_embeddings import add_embeddings
+
+
+# Function to fetch videos from a channel
+def fetch_video(video_id):
+    data = []
+    try:
+        transcript = YouTubeTranscriptApi.get_transcript(video_id)
+        formatted = format_transcript(transcript)
+        for chunk in formatted:
+            start_time = chunk["start_time"]
+            text = chunk["text"]
+            data.append([video_id, title, start_time, text])
+    except:
+        pass
+
+    return data
+
+
+
+def format_transcript(transcript, pause_threshold=2.0, max_sentences=10, max_words=300):
+    '''
+    Helper function to reformat transcript to paragraph-by-paragraph versus very short snippets that the API returns by default.
+    '''
+
+    paragraphs = []
+    current_paragraph = []
+    current_word_count = 0
+    current_sentence_count = 0
+    start_time_of_current_paragraph = None
+
+    for i, entry in enumerate(transcript):
+        current_word_count += len(entry['text'].split())
+        current_sentence_count += entry['text'].count('.')
+
+        # Store the start time of the current paragraph
+        if start_time_of_current_paragraph is None:
+            start_time_of_current_paragraph = entry['start']
+
+        current_paragraph.append(entry['text'])
+
+        # Check if the current entry is the last one
+        is_last = i == len(transcript) - 1
+
+        # If it's not the last entry, calculate the pause before the next entry
+        if not is_last:
+            next_entry = transcript[i + 1]
+            pause = next_entry['start'] - (entry['start'] + entry['duration'])
+        else:
+            pause = None
+
+        # Check conditions to end the paragraph
+        should_break = (
+            is_last or
+            (pause and pause > pause_threshold) or
+            current_word_count >= max_words or
+            current_sentence_count >= max_sentences
+        )
+
+        if should_break:
+            paragraph_text = ' '.join(current_paragraph)
+            paragraphs.append({
+                'text': paragraph_text,
+                'start_time': int(round(start_time_of_current_paragraph))
+            })
+
+            # Reset counters and lists
+            current_paragraph = []
+            current_word_count = 0
+            current_sentence_count = 0
+            start_time_of_current_paragraph = None
+
+    return paragraphs
+
+
 
 def extract_text_from_youtube(youtube_url):
     """Extracts text from a YouTube captions file using youtube-transcript-api."""
