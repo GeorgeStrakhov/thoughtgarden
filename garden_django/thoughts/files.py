@@ -90,9 +90,6 @@ def extract_text_from_docx(docx_path):
     return '\n'.join(full_text)
 
 
-#Youtube
-import pandas as pd
-from calc_embeddings import add_embeddings
 
 
 # Function to fetch videos from a channel
