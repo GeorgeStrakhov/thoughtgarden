@@ -14,6 +14,9 @@ RUN git clone --branch $PGVECTOR_VERSION https://github.com/pgvector/pgvector.gi
 WORKDIR /pgvector
 RUN make && make install
 
+# Create the "postgres" role with a default password
+RUN echo "CREATE ROLE postgres WITH SUPERUSER LOGIN PASSWORD 'postgres';" > /docker-entrypoint-initdb.d/init-role.sql
+
 # Create a new image to keep it clean
 FROM postgres:16
 COPY --from=builder /usr/lib/postgresql/$PG_MAJOR/lib/vector.so /usr/lib/postgresql/$PG_MAJOR/lib/

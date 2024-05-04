@@ -52,6 +52,7 @@ SECRET_KEY = get_env_variable('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = get_env_variable('DEBUG') == '1'  # Assuming DEBUG=1 for True
 
+
 ALLOWED_HOSTS = get_env_variable('DJANGO_ALLOWED_HOSTS').split(' ')
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
@@ -115,8 +116,12 @@ CSRF_TRUSTED_ORIGINS=['https://*.'+DOMAIN, 'https://'+DOMAIN, 'http://*.'+DOMAIN
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 
-# Load the USE_EXTERNAL_DB flag; default to False if not specified
-use_external_db = os.getenv('USE_EXTERNAL_DB', 'False') == 'True'
+if DEBUG:
+    ALLOWED_HOSTS = ['*']
+    MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+
 
 # Database configuration
 DATABASES = {

@@ -11,6 +11,12 @@ services:
       - postgres_data:/var/lib/postgresql/data
     env_file:
       - .env
+    user: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -h localhost -p 5432"]
+      interval: 1s
+      timeout: 10s
+      retries: 5
 
   redis:
     image: redis:latest
@@ -19,7 +25,11 @@ services:
 
   web:
     build: ./garden_django
-    command: python manage.py runserver 0.0.0.0:8000
+    command: >
+      sh -c "until pg_isready -h db -p 5432 -U garden_db; do sleep 1; done &&
+            python manage.py migrate &&
+            python create_superuser.py &&
+            python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./garden_django:/code
     ports:
@@ -27,19 +37,19 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
 
   qcluster:
     build: ./garden_django
-    command: python manage.py qcluster
+    command: sh -c "until pg_isready -h db -p 5432 -U garden_db; do sleep 1; done && python manage.py qcluster"
     volumes:
       - ./garden_django:/code
     env_file:
       - .env
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
 
 volumes:
   postgres_data:
