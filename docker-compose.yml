@@ -25,6 +25,7 @@ services:
 
   web:
     build: ./garden_django
+    image: garden/web
     command: >
       sh -c "until pg_isready -h db -p 5432 -U garden_db; do sleep 1; done &&
             python manage.py migrate &&
@@ -41,7 +42,7 @@ services:
         condition: service_healthy
 
   qcluster:
-    build: ./garden_django
+    image: garden/web
     command: sh -c "until pg_isready -h db -p 5432 -U garden_db; do sleep 1; done && python manage.py qcluster"
     volumes:
       - ./garden_django:/code
