@@ -28,6 +28,7 @@ class Seed(models.Model):
     description = models.TextField(blank=True, null=True)
     
     # Content and metadata
+    is_youtube = models.BooleanField(default=False)
     content_url = models.URLField(max_length=1024, blank=True, null=True)
     reserve_file = models.FileField(upload_to='reserves/', blank=True, null=True)
     thumbnail = models.ImageField(upload_to='thumbnails/', blank=True, null=True)
@@ -54,6 +55,7 @@ class Snippet(models.Model):
     seed = models.ForeignKey(Seed, related_name='parts', on_delete=models.CASCADE)
     content = models.TextField()
     embedding = VectorField(dimensions=1536, default = [0]*1536)
+    start_time = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         return f"Part of {self.seed.title}"

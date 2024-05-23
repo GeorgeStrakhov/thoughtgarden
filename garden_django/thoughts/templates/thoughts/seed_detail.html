@@ -82,11 +82,23 @@
                 {% if highlighted_part and part.id == highlighted_part.id %}
                     <div class="list-group-item list-group-item-action" style="background-color: #ffff99;"> <!-- Light yellow background for highlighted part -->
                         <p>{{ part.content }}</p>
+                        {% if part.start_time is not None %}
+                            <p><strong>Start Time:</strong> {{ part.start_time }}</p>
+                            {% if part.seed.is_youtube %}
+                                <p><a href="{{ part.seed.content_url }}?t={{ part.start_time }}">Watch on YouTube</a></p>
+                            {% endif %}
+                        {% endif %}
                         <a href="{% url 'find_similar_seeds' snippet_id=part.id %}" class="btn btn-secondary">Find Similar</a>
                     </div>
                 {% else %}
                     <div class="list-group-item list-group-item-action">
                         <p>{{ part.content }}</p>
+                        {% if part.start_time is not None %}
+                            <p><strong>Start Time:</strong> {{ part.start_time }}</p>
+                            {% if part.seed.is_youtube %}
+                                <p><a href="{{ part.seed.content_url }}?t={{ part.start_time }}">Watch on YouTube</a></p>
+                            {% endif %}
+                        {% endif %}
                         <a href="{% url 'find_similar_seeds' snippet_id=part.id %}" class="btn btn-secondary">Find Similar</a>
                     </div>
                 {% endif %}

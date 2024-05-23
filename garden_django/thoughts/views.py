@@ -124,7 +124,8 @@ def process_youtube_url(request):
         
         try:
             # Extract captions or relevant text from the YouTube video.
-            caption_text = extract_text_from_youtube(youtube_url)
+            caption_text_list, caption_text = extract_text_from_youtube(youtube_url)
+            
             # Create a new idea or entity in your system based on the YouTube video.
             seed = create_seed_from_youtube(youtube_url, caption_text, request.user)
 
@@ -134,8 +135,13 @@ def process_youtube_url(request):
 
             # Break down the caption text into chunks and process asynchronously.
             if seed:
-                for chunk in split_text_into_chunks(caption_text, max_chunk_size=request.user.max_chunk_size_setting):
-                    async_task('thoughts.main_logic.create_snippet_from', chunk, seed, request.user, group=str(seed.pk))
+                for chunk in caption_text_list:
+                    try:
+                        chunk_text = chunk['text']
+                        chunk_start_time = chunk['start_time'] if 'start_time' in chunk else None
+                    except KeyError:
+                        return HttpResponse("Invalid format for caption text.", status=400)
+                    async_task('thoughts.main_logic.create_snippet_from', chunk_text, seed, request.user, group=str(seed.pk), start_time=chunk_start_time)
             # Optional: Further processing with caption_text or idea.
         except Exception as e:
             return HttpResponse(f"Error processing YouTube URL: {str(e)}", status=500)

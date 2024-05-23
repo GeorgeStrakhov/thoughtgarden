@@ -73,6 +73,7 @@ def create_seed_from_youtube(url : str, video_text : str, user : settings.AUTH_U
         garden=garden,
         title=yt.title,
         description=yt.description,
+        is_youtube=True,
         content_url=url,
         author=yt.author,
         transcript=video_text,
@@ -88,7 +89,7 @@ def create_seed_from_youtube(url : str, video_text : str, user : settings.AUTH_U
     return seed
 
 
-def create_snippet_from(text: str, seed: Seed, user: settings.AUTH_USER_MODEL = None):
+def create_snippet_from(text: str, seed: Seed, user: settings.AUTH_USER_MODEL = None, start_time: int = None):
     embedding = get_embedding(text, user)
-    snippet = Snippet.objects.create(content=text, seed=seed, embedding=embedding)
+    snippet = Snippet.objects.create(content=text, seed=seed, embedding=embedding, start_time=start_time)
     return snippet

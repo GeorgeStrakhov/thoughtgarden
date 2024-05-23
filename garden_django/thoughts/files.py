@@ -68,6 +68,7 @@ def process_and_create_embeddings(text, seed_title, user):
 
     return seed
 
+#PDF
 def extract_text_from_pdf(pdf_file):
     """Extracts text from a PDF file."""
     text = ""
@@ -90,24 +91,7 @@ def extract_text_from_docx(docx_path):
     return '\n'.join(full_text)
 
 
-
-
-# Function to fetch videos from a channel
-def fetch_video(video_id):
-    data = []
-    try:
-        transcript = YouTubeTranscriptApi.get_transcript(video_id)
-        formatted = format_transcript(transcript)
-        for chunk in formatted:
-            start_time = chunk["start_time"]
-            text = chunk["text"]
-            data.append([video_id, title, start_time, text])
-    except:
-        pass
-
-    return data
-
-
+#YOUTUBE
 
 def format_transcript(transcript, pause_threshold=2.0, max_sentences=10, max_words=300):
     '''
@@ -115,6 +99,7 @@ def format_transcript(transcript, pause_threshold=2.0, max_sentences=10, max_wor
     '''
 
     paragraphs = []
+    paragraphs_text = ""
     current_paragraph = []
     current_word_count = 0
     current_sentence_count = 0
@@ -126,7 +111,7 @@ def format_transcript(transcript, pause_threshold=2.0, max_sentences=10, max_wor
 
         # Store the start time of the current paragraph
         if start_time_of_current_paragraph is None:
-            start_time_of_current_paragraph = entry['start']
+            start_time_of_current_paragraph = entry.get('start', 0)
 
         current_paragraph.append(entry['text'])
 
@@ -150,10 +135,13 @@ def format_transcript(transcript, pause_threshold=2.0, max_sentences=10, max_wor
 
         if should_break:
             paragraph_text = ' '.join(current_paragraph)
+            # Ensure the start time is not negative
+            rounded_start_time = max(0, int(round(start_time_of_current_paragraph)))
             paragraphs.append({
                 'text': paragraph_text,
-                'start_time': int(round(start_time_of_current_paragraph))
+                'start_time': rounded_start_time
             })
+            paragraphs_text += paragraph_text + '\n\n'
 
             # Reset counters and lists
             current_paragraph = []
@@ -161,7 +149,8 @@ def format_transcript(transcript, pause_threshold=2.0, max_sentences=10, max_wor
             current_sentence_count = 0
             start_time_of_current_paragraph = None
 
-    return paragraphs
+    print(paragraphs, paragraphs_text)
+    return paragraphs, paragraphs_text
 
 
 
@@ -183,10 +172,8 @@ def extract_text_from_youtube(youtube_url):
             else:
                 return "No transcripts available."
 
-        # Format the transcript as SRT
-        formatter = TextFormatter()
-        srt = formatter.format_transcript(transcript.fetch())
-        return srt
+        you_list, you_text = format_transcript(transcript.fetch())
+        return you_list, you_text
     except Exception as e:
         return f"An error occurred: {str(e)}"
     
