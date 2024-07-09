@@ -154,9 +154,10 @@ def format_transcript(transcript, pause_threshold=2.0, max_sentences=10, max_wor
 
 
 
-def extract_text_from_youtube(youtube_url):
+def extract_text_from_youtube(youtube_url, video_id = None):
     """Extracts text from a YouTube captions file using youtube-transcript-api."""
-    video_id = extract.video_id(youtube_url)  # Simple extraction of video ID from URL
+    if video_id == None:
+        video_id = extract.video_id(youtube_url)  # Simple extraction of video ID from URL
     try:
         # Attempt to fetch the transcript list of the video
         transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
