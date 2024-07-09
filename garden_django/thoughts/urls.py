@@ -19,5 +19,7 @@ urlpatterns = [
     path('process_youtube_url/', views.process_youtube_url, name='process_youtube_url'),
     path('create_seed/', views.create_seed, name='create_seed'),
 
+    path('get_captions/<str:video_id>/', views.return_captions, name='return_captions'),
+
     
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect, HttpResponse, get_object_or_404
+from django.http import JsonResponse
+
 from .forms import SeedForm, SearchForm, FileUploadForm, YouTubeForm, SeedBigForm
 from .models import Seed, Snippet, Garden
 from .main_logic import create_seed_from_youtube, create_seed_from
@@ -259,3 +261,10 @@ def seed_edit_view(request, pk):
 @login_required
 def home(request):
     return redirect('seeds_list')  # Redirect to the seeds list view
+
+
+def return_captions(request, video_id):
+    formatted_captions, text = extract_text_from_youtube(video_id)
+    if isinstance(formatted_captions, str):
+        return JsonResponse({'error': formatted_captions}, status=404)
+    return JsonResponse({'captions': formatted_captions, 'text': text})
