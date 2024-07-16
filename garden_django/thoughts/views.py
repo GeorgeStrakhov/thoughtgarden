@@ -267,4 +267,4 @@ def return_captions(request, video_id):
     formatted_captions, text = extract_text_from_youtube(youtube_url='test_url',video_id = video_id)
     if isinstance(formatted_captions, str):
         return JsonResponse({'error': formatted_captions}, status=404)
-    return JsonResponse({'captions': formatted_captions, 'text': text})
+    return JsonResponse({'captions': formatted_captions, 'text': text[:10000], 'full_text': text , 'too_long': len(text) > 10000})
