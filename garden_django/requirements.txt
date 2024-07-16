@@ -17,3 +17,4 @@ requests==2.31.0
 youtube-transcript-api==0.6.2
 supervisor
 whitenoise
+python-telegram-bot==21.4

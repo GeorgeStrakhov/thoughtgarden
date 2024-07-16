@@ -7,3 +7,6 @@ class CustomUser(AbstractUser):
     api_key = models.CharField(max_length=255, blank=True, null=True)
     use_system_api_key = models.BooleanField(default=False)
     max_chunk_size_setting = models.IntegerField(default=600)
+
+    telegram_id = models.CharField(max_length=255, blank=True, null=True)
+    email = models.EmailField(unique=True)

@@ -57,6 +57,8 @@ ALLOWED_HOSTS = get_env_variable('DJANGO_ALLOWED_HOSTS').split(' ')
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
+TOKEN_TG = get_env_variable('TOKEN_TG')
+SYSTEM_PASSWORD = get_env_variable('SYSTEM_PASSWORD')
 
 # Application definition
 
@@ -72,6 +74,7 @@ INSTALLED_APPS = [
     'storages', 
     'thoughts', 
     'accounts',
+    'telegram_bot',
 ]
 
 MIDDLEWARE = [

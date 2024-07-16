@@ -87,3 +87,19 @@ def get_tags(text: str, user,  model: str = "gpt-3.5-turbo"):
     tags = completion.choices[0].message.content
 
     return tags
+
+def get_user_intent(user_message: str, user) -> str:
+    client = get_client(user)
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": f"The user says: '{user_message}'. What do they want to do? \
+             Options: they can upload new content by files, youtube links, or text. They can also search for a text. List seeds, seed detail or find similar. Also they can search.\
+             Your goal to return the action they want to do. Commands are: \
+             list seeds, create seed, search, find similar, process youtube, upload file, seed detail, search"}
+        ],
+        max_tokens=5000
+    )
+    action = response['choices'][0]['message']['content'].strip().lower()
+    return action

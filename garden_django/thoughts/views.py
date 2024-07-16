@@ -154,7 +154,7 @@ def process_youtube_url(request):
 
 def process_file_async(uploaded_file, seed, user_id, upload_to_s3):
     User = get_user_model()
-    user = User.objects.get(id=user_id)  # Retrieve user object using ID
+    user = User.objects.get(id=user_id)  
     if upload_to_s3:
         username = user.username
         safe_filename = slugify(uploaded_file.name.rsplit('.', 1)[0])[:50]
