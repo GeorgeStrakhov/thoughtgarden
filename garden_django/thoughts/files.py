@@ -148,7 +148,6 @@ def format_transcript(transcript, pause_threshold=2.0, max_sentences=10, max_wor
             current_word_count = 0
             current_sentence_count = 0
             start_time_of_current_paragraph = None
-
     print(paragraphs, paragraphs_text)
     return paragraphs, paragraphs_text
 
@@ -174,6 +173,8 @@ def extract_text_from_youtube(youtube_url, video_id = None):
                 return "No transcripts available."
 
         you_list, you_text = format_transcript(transcript.fetch())
+        print('list', you_list)
+        print('text', you_text)
         return you_list, you_text
     except Exception as e:
         return f"An error occurred: {str(e)}"
