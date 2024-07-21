@@ -148,7 +148,6 @@ def format_transcript(transcript, pause_threshold=2.0, max_sentences=10, max_wor
             current_word_count = 0
             current_sentence_count = 0
             start_time_of_current_paragraph = None
-    print(paragraphs, paragraphs_text)
     return paragraphs, paragraphs_text
 
 

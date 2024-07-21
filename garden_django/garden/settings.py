@@ -193,12 +193,12 @@ if USE_S3:
     AWS_LOCATION = os.getenv('AWS_LOCATION', '')
 
     # Static files configuration
-    STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_ENDPOINT_URL}/{AWS_LOCATION}/static/'
+    STATIC_URL = f'{AWS_S3_ENDPOINT_URL}/static/'
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
     # Media files configuration
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_ENDPOINT_URL}/{AWS_LOCATION}/media/'
+    MEDIA_URL = f'{AWS_S3_ENDPOINT_URL}/media/'
 
     # Setup for public access, if necessary
     AWS_DEFAULT_ACL = 'public-read'  # Be cautious with this setting
