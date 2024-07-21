@@ -264,7 +264,26 @@ def home(request):
 
 
 def return_captions(request, video_id):
-    formatted_captions, text = extract_text_from_youtube(youtube_url='test_url',video_id = video_id)
-    if isinstance(formatted_captions, str):
-        return JsonResponse({'error': formatted_captions}, status=404)
-    return JsonResponse({'captions': formatted_captions, 'text': text[:10000], 'full_text': text , 'too_long': len(text) > 10000})
+    logging.debug("Request received for video ID: %s", video_id)
+    
+    result = extract_text_from_youtube(youtube_url='test_url', video_id=video_id)
+    logging.debug("Result from extract_text_from_youtube: %s", result)
+    
+    if isinstance(result, str):
+        logging.error("Error from extract_text_from_youtube: %s", result)
+        return JsonResponse({'error': result}, status=404)
+    
+    try:
+        formatted_captions, text = result
+        logging.debug("Formatted captions: %s", formatted_captions)
+        logging.debug("Text: %s", text)
+    except ValueError as e:
+        logging.error("Error unpacking result: %s", str(e))
+        return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({
+        'captions': formatted_captions,
+        'text': text[:10000],
+        'full_text': text,
+        'too_long': len(text) > 10000
+    })

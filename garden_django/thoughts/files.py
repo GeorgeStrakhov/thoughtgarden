@@ -152,30 +152,40 @@ def format_transcript(transcript, pause_threshold=2.0, max_sentences=10, max_wor
 
 
 
-def extract_text_from_youtube(youtube_url, video_id = None):
+def extract_text_from_youtube(youtube_url, video_id=None):
     """Extracts text from a YouTube captions file using youtube-transcript-api."""
-    if video_id == None:
+    logging.debug("Starting extract_text_from_youtube with video_id: %s", video_id)
+    
+    if video_id is None:
         video_id = extract.video_id(youtube_url)  # Simple extraction of video ID from URL
+        logging.debug("Extracted video_id: %s", video_id)
+    
     try:
         # Attempt to fetch the transcript list of the video
         transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
-        
+        logging.debug("Transcript list obtained: %s", transcript_list)
+
         # Try to get English transcript or fallback to any available transcript
         try:
             transcript = transcript_list.find_transcript(['en'])
-        except Exception:
+            logging.debug("English transcript found")
+        except Exception as e:
+            logging.debug("English transcript not found: %s", str(e))
             # Fallback to the first available transcript if English is not available
             transcripts = list(transcript_list)
             if transcripts:
                 transcript = transcripts[0]  # Select the first available transcript
+                logging.debug("Using first available transcript")
             else:
+                logging.error("No transcripts available")
                 return "No transcripts available."
 
         you_list, you_text = format_transcript(transcript.fetch())
-        print('list', you_list)
-        print('text', you_text)
+        logging.debug("Formatted captions: %s", you_list)
+        logging.debug("Formatted text: %s", you_text)
         return you_list, you_text
     except Exception as e:
+        logging.error("An error occurred: %s", str(e))
         return f"An error occurred: {str(e)}"
     
 
